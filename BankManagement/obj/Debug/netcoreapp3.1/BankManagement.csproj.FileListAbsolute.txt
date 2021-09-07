@@ -1,0 +1,12 @@
+/Users/aryangupta/Desktop/DotNet/Assessment1/BankManagement/BankManagement/bin/Debug/netcoreapp3.1/BankManagement.deps.json
+/Users/aryangupta/Desktop/DotNet/Assessment1/BankManagement/BankManagement/bin/Debug/netcoreapp3.1/BankManagement.runtimeconfig.json
+/Users/aryangupta/Desktop/DotNet/Assessment1/BankManagement/BankManagement/bin/Debug/netcoreapp3.1/BankManagement.runtimeconfig.dev.json
+/Users/aryangupta/Desktop/DotNet/Assessment1/BankManagement/BankManagement/bin/Debug/netcoreapp3.1/BankManagement.dll
+/Users/aryangupta/Desktop/DotNet/Assessment1/BankManagement/BankManagement/bin/Debug/netcoreapp3.1/BankManagement.pdb
+/Users/aryangupta/Desktop/DotNet/Assessment1/BankManagement/BankManagement/obj/Debug/netcoreapp3.1/BankManagement.csproj.AssemblyReference.cache
+/Users/aryangupta/Desktop/DotNet/Assessment1/BankManagement/BankManagement/obj/Debug/netcoreapp3.1/BankManagement.AssemblyInfoInputs.cache
+/Users/aryangupta/Desktop/DotNet/Assessment1/BankManagement/BankManagement/obj/Debug/netcoreapp3.1/BankManagement.AssemblyInfo.cs
+/Users/aryangupta/Desktop/DotNet/Assessment1/BankManagement/BankManagement/obj/Debug/netcoreapp3.1/BankManagement.csproj.CoreCompileInputs.cache
+/Users/aryangupta/Desktop/DotNet/Assessment1/BankManagement/BankManagement/obj/Debug/netcoreapp3.1/BankManagement.dll
+/Users/aryangupta/Desktop/DotNet/Assessment1/BankManagement/BankManagement/obj/Debug/netcoreapp3.1/BankManagement.pdb
+/Users/aryangupta/Desktop/DotNet/Assessment1/BankManagement/BankManagement/obj/Debug/netcoreapp3.1/BankManagement.genruntimeconfig.cache
