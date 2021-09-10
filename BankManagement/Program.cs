@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Net;
+using System.Net.Mail;
 
 namespace BankManagement
 {
@@ -52,8 +54,8 @@ namespace BankManagement
             {
                 Console.SetCursorPosition(errorCursorY, errorCursorX);
                 Console.WriteLine("Invalid Credentials \t\t| ");
-                Console.WriteLine(password + loginDetails[1]);
                 Console.ReadKey();
+                UserInterface();
             }
             
         }
@@ -89,7 +91,7 @@ namespace BankManagement
             int cursorY = Console.CursorLeft;
             Console.WriteLine("      |");
             Console.SetCursorPosition(cursorY, cursorX);
-            int userChoice = Int16.Parse(Console.ReadLine());
+            int userChoice = short.Parse(Console.ReadLine());
             Console.WriteLine(userChoice);
             //Navigation based on users choice
             Account account = new Account();
@@ -100,6 +102,16 @@ namespace BankManagement
                     break;
                 case 2:
                     account.Search();
+                    break;
+                case 3:
+                    account.Deposit();
+                    break;
+                case 4:
+                    account.Withdraw();
+                    break;
+                case 7:
+                    LogIn login = new LogIn();
+                    login.UserInterface();
                     break;
                 default:
                     UserInterface();
@@ -121,49 +133,26 @@ namespace BankManagement
             Console.WriteLine("             |");
             string[] userAccountFields = new string[5] {"First Name: ", "Last Name: ", "Address: ", "Phone: ", "Email: "};
             UserAccount newUser = new UserAccount();
-            for (int i = 0; i < userAccountFields.Length; i++)
-            {
-                Console.Write("\t\t| {0}", userAccountFields[i]);
-                int cursorX = Console.CursorTop;
-                int cursorY = Console.CursorLeft;
-                Console.WriteLine("\t\t\t   |");
-                Console.SetCursorPosition(cursorY, cursorX);
-                switch(userAccountFields[i])
-                {
-                    case "First Name: ":
-                        newUser.FirstName = Console.ReadLine();
-                        break;
-                    case "Last Name: ":
-                        newUser.LastName = Console.ReadLine();
-                        break;
-                    case "Address: ":
-                        newUser.Address = Console.ReadLine();
-                        break;
-                    case "Phone: ":
-                        newUser.Phone = Console.ReadLine();
-                        break;
-                    case "Email: ":
-                        newUser.Email = Console.ReadLine();
-                        break;
-                    default:    
-                        break;
-                }
-            }
-            Console.WriteLine("\t\t===================================");
-            Console.Write("\t\t|Is the information correct (y/n)?:");
+            //Call function to display creation form
+            EnterAccountInformation(userAccountFields, newUser);
+            //Check account fields, if anything is incorrect call function again so the user can re-enter
+            Console.WriteLine("\t\t====================================");
+            Console.Write("\t\t|Are the details correct (y/n)?:");
             int confirmationCursorX = Console.CursorTop;
             int confirmationCursorY = Console.CursorLeft;
-            Console.WriteLine("  |");
             Console.SetCursorPosition(confirmationCursorY, confirmationCursorX);
             char isInformationCorrect = Console.ReadKey().KeyChar;
+            Console.WriteLine("  |");
             switch (isInformationCorrect)
             {
                 case 'y':
-                    Console.WriteLine("Account created ! Details will be provided by email");
+                    Console.WriteLine("\t\t====================================");
+                    Console.WriteLine("\t\t|Account created !                 |");
+                    Console.WriteLine("\t\t|Details will be provided by email |");
                     Random accountNumber = new Random();
                     //Create unique 8 digit number
                     newUser.AccountNumber = accountNumber.Next(10000000, 99999999);
-                    Console.WriteLine("Account number is: " + newUser.AccountNumber);
+                    Console.WriteLine("\t\t|Account number is: " + newUser.AccountNumber + "\t   |");
                     break;
                 case 'n':
                     Create();
@@ -179,9 +168,42 @@ namespace BankManagement
                 $"Balance|{newUser.Balance}"
             };
             File.WriteAllLines($"{newUser.AccountNumber}.txt", accountDetails);
+            //Email details to account
+
             Console.ReadKey();
             MainMenu mainMenu = new MainMenu();
             mainMenu.UserInterface();
+        }
+        public void EnterAccountInformation(string[] userAccountFields, UserAccount newUser)
+        {
+            for (int i = 0; i < userAccountFields.Length; i++)
+            {
+                Console.Write("\t\t| {0}", userAccountFields[i]);
+                int cursorX = Console.CursorTop;
+                int cursorY = Console.CursorLeft;
+                Console.WriteLine("\t\t\t   |");
+                Console.SetCursorPosition(cursorY, cursorX);
+                switch (userAccountFields[i])
+                {
+                    case "First Name: ":
+                        newUser.FirstName = Console.ReadLine();
+                        break;
+                    case "Last Name: ":
+                        newUser.LastName = Console.ReadLine();
+                        break;
+                    case "Address: ":
+                        newUser.Address = Console.ReadLine();
+                        break;
+                    case "Phone: ":
+                        newUser.Phone = int.Parse(Console.ReadLine());
+                        break;
+                    case "Email: ":
+                        newUser.Email = Console.ReadLine();
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
         public void Search()
         {
@@ -200,6 +222,7 @@ namespace BankManagement
             Console.SetCursorPosition(cursorY, cursorX);
 
             int accountNumber = Int32.Parse(Console.ReadLine());
+            //If account exists
             if (File.Exists($"{accountNumber}.txt"))
             {
                 Console.Write("\t\t| Account found!");
@@ -215,7 +238,149 @@ namespace BankManagement
                 }
                 Console.WriteLine("\t\t===================================");
             }
+            //If account doesn't exist, search again with message account not found
             else
+            {
+                if (CheckAnother(true).Equals(true))
+                {
+                    Search();
+                }
+                else
+                {
+                    MainMenu menu = new MainMenu();
+                    menu.UserInterface();
+                }
+            }
+            //After a successful search, ask if user wants to search again
+            if (CheckAnother(false).Equals(true))
+            {
+                Search();
+            }
+            else
+            {
+                MainMenu menu = new MainMenu();
+                menu.UserInterface();
+            }
+        }
+        public void Deposit()
+        {
+            //Clear screen
+            Console.Clear();
+            //Render deposit UI
+            Console.WriteLine("\t\t===================================");
+            Console.WriteLine("\t\t|     Deposit                     |");
+            Console.WriteLine("\t\t===================================");
+            Console.Write("\t\t|    Enter the details");
+            Console.WriteLine("            |");
+            Console.Write("\t\t| Account Number: ");
+            int cursorX = Console.CursorTop;
+            int cursorY = Console.CursorLeft;
+            Console.WriteLine("\t\t  |");
+            Console.SetCursorPosition(cursorY, cursorX);
+            //Find account
+            int accountNumber = Int32.Parse(Console.ReadLine());
+            string fileName = accountNumber.ToString();
+            //If account exists, deposit into account and return to menu
+            if (File.Exists($"{fileName}.txt"))
+            {
+                Console.Write("\t\t| Account found!");
+                Console.WriteLine("                  |");
+                Console.Write("\t\t| Amount: $");
+                int xCursor = Console.CursorTop;
+                int yCursor = Console.CursorLeft;
+                Console.WriteLine("\t\t          |");
+                Console.SetCursorPosition(yCursor, xCursor);
+                int balance = int.Parse(Console.ReadLine());
+                //Add balance to existing balance and write to file
+                string accountInformation = File.ReadAllText($"{fileName}.txt");
+                var currentBalance = accountInformation.TextAfter("Balance|");
+                balance = int.Parse(currentBalance) + balance;
+                accountInformation = accountInformation.Replace(currentBalance, $"{balance}");
+                File.WriteAllText($"{fileName}.txt", accountInformation);
+                Console.Write("\t\t| Deposit Successful!");
+                Console.WriteLine("             |");
+                Console.WriteLine("\t\t===================================");
+                Console.ReadKey();
+                MainMenu mainMenu = new MainMenu();
+                mainMenu.UserInterface();
+            }
+            //if account not found, search again
+            else
+            {
+                if (CheckAnother(true).Equals(true))
+                {
+                    Deposit();
+                }
+                else
+                {
+                    MainMenu menu = new MainMenu();
+                    menu.UserInterface();
+                }
+            }
+
+        }
+        public void Withdraw()
+        {
+            //Clear screen
+            Console.Clear();
+            //Render withdraw UI
+            Console.WriteLine("\t\t===================================");
+            Console.WriteLine("\t\t|     Withdraw                    |");
+            Console.WriteLine("\t\t===================================");
+            Console.Write("\t\t|    Enter the details");
+            Console.WriteLine("            |");
+            Console.Write("\t\t| Account Number: ");
+            int cursorX = Console.CursorTop;
+            int cursorY = Console.CursorLeft;
+            Console.WriteLine("\t\t  |");
+            Console.SetCursorPosition(cursorY, cursorX);
+            //Find account
+            int accountNumber = Int32.Parse(Console.ReadLine());
+            string fileName = accountNumber.ToString();
+            //If account found withdraw balance and return to menu
+            if (File.Exists($"{fileName}.txt"))
+            {
+                Console.Write("\t\t| Account found!");
+                Console.WriteLine("                  |");
+                Console.Write("\t\t| Amount: $");
+                int xCursor = Console.CursorTop;
+                int yCursor = Console.CursorLeft;
+                Console.WriteLine("\t\t          |");
+                Console.SetCursorPosition(yCursor, xCursor);
+                int balance = int.Parse(Console.ReadLine());
+                //Subtract balance from existing balance and write to file
+                string accountInformation = File.ReadAllText($"{fileName}.txt");
+                var currentBalance = accountInformation.TextAfter("Balance|");
+                balance = balance - int.Parse(currentBalance);
+                accountInformation = accountInformation.Replace(currentBalance, $"{balance}");
+                File.WriteAllText($"{fileName}.txt", accountInformation);
+                Console.Write("\t\t| Deposit Successful!");
+                Console.WriteLine("             |");
+                Console.WriteLine("\t\t===================================");
+                Console.ReadKey();
+                //Return to main menu
+                MainMenu mainMenu = new MainMenu();
+                mainMenu.UserInterface();
+            }
+            //If account not found search again
+            else
+            {
+                if (CheckAnother(true).Equals(true))
+                {
+                    Withdraw();
+                }
+                else
+                {
+                    MainMenu menu = new MainMenu();
+                    menu.UserInterface();
+                }
+            }
+            
+
+            }
+        public bool CheckAnother(bool accountFound)
+        {
+            if (accountFound)
             {
                 Console.Write("\t\t| Account not found!");
                 Console.WriteLine("              |");
@@ -225,20 +390,21 @@ namespace BankManagement
             int confirmationCursorY = Console.CursorLeft;
             Console.SetCursorPosition(confirmationCursorY, confirmationCursorX);
             char yesOrNo = Console.ReadKey().KeyChar;
+            bool searchAgain = false;
             switch (yesOrNo)
             {
                 case 'y':
-                    Search();
+                    searchAgain = true;
                     break;
                 case 'n':
-                    MainMenu menu = new MainMenu();
-                    menu.UserInterface();
+                    searchAgain = false;
                     break;
                 default:
                     break;
             }
+            return searchAgain;
         }
-    }
+        }
     class Program
     {
         static void Main(string[] args)
@@ -246,6 +412,14 @@ namespace BankManagement
             LogIn logIn = new LogIn();
             //Create Login UI
             logIn.UserInterface();
+        }
+    }
+    public static class Extension
+    {
+        //Helps with deposits and withdrawals to find the text after 'Balance|'dus
+        public static string TextAfter(this string value, string search)
+        {
+            return value.Substring(value.IndexOf(search) + search.Length);
         }
     }
 }

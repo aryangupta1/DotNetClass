@@ -1,0 +1,7 @@
+First Name|
+Last Name |
+Address|
+Phone|1
+Email|
+AccountNo|76205166
+Balance|0

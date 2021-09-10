@@ -1,7 +1,0 @@
-First Name|afaf
-Last Name |afaefae
-Address|afaefa
-Phone|aefafe
-Email|af
-AccountNo|29257605
-Balance|0

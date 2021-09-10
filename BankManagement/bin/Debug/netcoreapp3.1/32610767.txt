@@ -1,7 +1,0 @@
-First Name|aryan
-Last Name |gupta
-Address|13425
-Phone|aryafn
-Email|frag
-AccountNo|32610767
-Balance|0

@@ -1,7 +1,7 @@
 First Name|Aryan
 Last Name |Gupta
 Address|2/121 Sydney Road
-Phone|0411528571
-Email|aryan@gmail.com
-AccountNo|27865083
+Phone|411528571
+Email|aryan.gupta1@outlook.com
+AccountNo|52468633
 Balance|0
