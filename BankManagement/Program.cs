@@ -95,6 +95,7 @@ namespace BankManagement
             Console.WriteLine(userChoice);
             //Navigation based on users choice
             Account account = new Account();
+            Email email = new Email();
             switch (userChoice)
             {
                 case 1:
@@ -108,6 +109,9 @@ namespace BankManagement
                     break;
                 case 4:
                     account.Withdraw();
+                    break;
+                case 5:
+                    email.AccountStatement();
                     break;
                 case 7:
                     LogIn login = new LogIn();
@@ -169,7 +173,8 @@ namespace BankManagement
             };
             File.WriteAllLines($"{newUser.AccountNumber}.txt", accountDetails);
             //Email details to account
-
+            Email email = new Email();
+            email.Confirmation(newUser.Email, newUser.AccountNumber);
             Console.ReadKey();
             MainMenu mainMenu = new MainMenu();
             mainMenu.UserInterface();
@@ -241,7 +246,7 @@ namespace BankManagement
             //If account doesn't exist, search again with message account not found
             else
             {
-                if (CheckAnother(true).Equals(true))
+                if (CheckAccount(true).Equals(true))
                 {
                     Search();
                 }
@@ -252,7 +257,7 @@ namespace BankManagement
                 }
             }
             //After a successful search, ask if user wants to search again
-            if (CheckAnother(false).Equals(true))
+            if (CheckAccount(false).Equals(true))
             {
                 Search();
             }
@@ -307,7 +312,7 @@ namespace BankManagement
             //if account not found, search again
             else
             {
-                if (CheckAnother(true).Equals(true))
+                if (CheckAccount(true).Equals(true))
                 {
                     Deposit();
                 }
@@ -351,7 +356,7 @@ namespace BankManagement
                 //Subtract balance from existing balance and write to file
                 string accountInformation = File.ReadAllText($"{fileName}.txt");
                 var currentBalance = accountInformation.TextAfter("Balance|");
-                balance = balance - int.Parse(currentBalance);
+                balance = int.Parse(currentBalance) - balance;
                 accountInformation = accountInformation.Replace(currentBalance, $"{balance}");
                 File.WriteAllText($"{fileName}.txt", accountInformation);
                 Console.Write("\t\t| Deposit Successful!");
@@ -365,7 +370,7 @@ namespace BankManagement
             //If account not found search again
             else
             {
-                if (CheckAnother(true).Equals(true))
+                if (CheckAccount(true).Equals(true))
                 {
                     Withdraw();
                 }
@@ -378,9 +383,9 @@ namespace BankManagement
             
 
             }
-        public bool CheckAnother(bool accountFound)
+        public bool CheckAccount(bool accountNotFound)
         {
-            if (accountFound)
+            if (accountNotFound)
             {
                 Console.Write("\t\t| Account not found!");
                 Console.WriteLine("              |");
@@ -404,7 +409,53 @@ namespace BankManagement
             }
             return searchAgain;
         }
+    }
+    class Email
+    {
+        public SmtpClient smtpClient()
+        {
+            var smtpClient = new SmtpClient("smtp.gmail.com")
+            {
+                Port = 587,
+                Credentials = new NetworkCredential("aryantesting2001@gmail.com", "dotNetTestingAryan"),
+                EnableSsl = true
+            };
+            return smtpClient;
         }
+        public void Confirmation(string recipient, int accountNumber)
+        {
+            var client = smtpClient();
+            string file = File.ReadAllText($"{accountNumber}.txt");
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress("aryantesting2001@gmail.com"),
+                Subject = "Your account details",
+                Body = file
+            };
+            mailMessage.To.Add(recipient);
+            client.Send(mailMessage);
+        }
+        public void AccountStatement()
+        {
+            Account account = new Account();
+            //Clear screen
+            Console.Clear();
+            //Render AC Statement UI
+            Console.WriteLine("\t\t===================================");
+            Console.WriteLine("\t\t|     Statement                   |");
+            Console.WriteLine("\t\t===================================");
+            Console.Write("\t\t|    Enter the details");
+            Console.WriteLine("            |");
+            Console.Write("\t\t| Account Number: ");
+            int cursorX = Console.CursorTop;
+            int cursorY = Console.CursorLeft;
+            Console.WriteLine("\t\t  |");
+            Console.SetCursorPosition(cursorY, cursorX);
+            //Find account
+            int accountNumber = Int32.Parse(Console.ReadLine());
+            string fileName = accountNumber.ToString();
+        }
+    }
     class Program
     {
         static void Main(string[] args)

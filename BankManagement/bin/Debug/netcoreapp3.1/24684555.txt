@@ -1,0 +1,7 @@
+First Name|Aryan 
+Last Name |Gupta
+Address|123 At Mnaly
+Phone|411
+Email|aryan.gupta1@outlook.com
+AccountNo|24684555
+Balance|0

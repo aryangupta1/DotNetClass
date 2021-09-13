@@ -1,7 +1,7 @@
 First Name|Aryan
 Last Name |Gupta
 Address|336/17 Howard Avenue
-Phone|0411528571
+Phone|10411528571
 Email|aryan@mail.com
-AccountNo|64110135
-Balance|0
+AccountNo|641110135
+Balance|10
