@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Mail;
@@ -269,6 +270,7 @@ namespace BankManagement
         }
         public void Deposit()
         {
+            Account account = new Account();
             //Clear screen
             Console.Clear();
             //Render deposit UI
@@ -296,9 +298,10 @@ namespace BankManagement
                 Console.WriteLine("\t\t          |");
                 Console.SetCursorPosition(yCursor, xCursor);
                 int balance = int.Parse(Console.ReadLine());
+                int amount = balance; //Save for deposit amount
                 //Add balance to existing balance and write to file
                 string accountInformation = File.ReadAllText($"{fileName}.txt");
-                var currentBalance = accountInformation.TextAfter("Balance|");
+                var currentBalance = Helpers.GetSpecificLine($"{fileName}.txt", 7).Replace("Balance|", "");
                 balance = int.Parse(currentBalance) + balance;
                 accountInformation = accountInformation.Replace(currentBalance, $"{balance}");
                 File.WriteAllText($"{fileName}.txt", accountInformation);
@@ -306,6 +309,8 @@ namespace BankManagement
                 Console.WriteLine("             |");
                 Console.WriteLine("\t\t===================================");
                 Console.ReadKey();
+                //Add transaction to history on file
+                account.WriteTransaction(fileName, "Deposit", amount, balance);
                 MainMenu mainMenu = new MainMenu();
                 mainMenu.UserInterface();
             }
@@ -326,6 +331,7 @@ namespace BankManagement
         }
         public void Withdraw()
         {
+            Account account = new Account();
             //Clear screen
             Console.Clear();
             //Render withdraw UI
@@ -353,9 +359,10 @@ namespace BankManagement
                 Console.WriteLine("\t\t          |");
                 Console.SetCursorPosition(yCursor, xCursor);
                 int balance = int.Parse(Console.ReadLine());
+                int amount = balance; //Save this value as withdrawal amount
                 //Subtract balance from existing balance and write to file
                 string accountInformation = File.ReadAllText($"{fileName}.txt");
-                var currentBalance = accountInformation.TextAfter("Balance|");
+                var currentBalance = Helpers.GetSpecificLine($"{fileName}.txt", 7).Replace("Balance|", "");
                 balance = int.Parse(currentBalance) - balance;
                 accountInformation = accountInformation.Replace(currentBalance, $"{balance}");
                 File.WriteAllText($"{fileName}.txt", accountInformation);
@@ -363,6 +370,8 @@ namespace BankManagement
                 Console.WriteLine("             |");
                 Console.WriteLine("\t\t===================================");
                 Console.ReadKey();
+                //Add to transaction history on file
+                account.WriteTransaction(fileName, "Withdraw", amount, balance);
                 //Return to main menu
                 MainMenu mainMenu = new MainMenu();
                 mainMenu.UserInterface();
@@ -382,7 +391,17 @@ namespace BankManagement
             }
             
 
+        }
+        public void WriteTransaction(string fileName, string transactionType, int transactionAmount, int totalBalance)
+        {
+            DateTime date = DateTime.Today;
+            string today = date.ToString("dd/M/yyyy", CultureInfo.InvariantCulture);
+            using(StreamWriter sw = File.AppendText($"{fileName}.txt"))
+            {
+                sw.WriteLine(Environment.NewLine + $"{today}|" + $"{transactionType}|{transactionAmount}" + $"|{totalBalance}");
+                sw.Close();
             }
+        }
         public bool CheckAccount(bool accountNotFound)
         {
             if (accountNotFound)
@@ -454,6 +473,23 @@ namespace BankManagement
             //Find account
             int accountNumber = Int32.Parse(Console.ReadLine());
             string fileName = accountNumber.ToString();
+            if (File.Exists($"{fileName}.txt"))
+            {
+
+            }
+            //If account not found search again
+            else
+            {
+                if (account.CheckAccount(true).Equals(true))
+                {
+                    AccountStatement();
+                }
+                else
+                {
+                    MainMenu menu = new MainMenu();
+                    menu.UserInterface();
+                }
+            }
         }
     }
     class Program
@@ -465,12 +501,18 @@ namespace BankManagement
             logIn.UserInterface();
         }
     }
-    public static class Extension
+    //Helper methods
+    public static class Helpers
     {
-        //Helps with deposits and withdrawals to find the text after 'Balance|'dus
-        public static string TextAfter(this string value, string search)
+        //Helps with deposits and withdrawals to find the text after 'Balance|'
+        public static string GetSpecificLine(string fileName, int lineNumber)
         {
-            return value.Substring(value.IndexOf(search) + search.Length);
+            using (var streamReader = new StreamReader(fileName))
+            {
+                for (int i = 1; i < lineNumber; i++)
+                    streamReader.ReadLine();
+                return streamReader.ReadLine();
+            }
         }
     }
 }
