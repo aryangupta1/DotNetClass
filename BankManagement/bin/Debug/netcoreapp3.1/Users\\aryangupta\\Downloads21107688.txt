@@ -1,7 +1,0 @@
-First Name|afa4g
-Last Name |argag
-Address|afag
-Phone|ag
-Email|a
-AccountNo|21107688
-Balance|0
