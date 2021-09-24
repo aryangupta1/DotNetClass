@@ -1,0 +1,13 @@
+First Name|Aryan
+Last Name |Gupta
+Address|2/121 Manly Road
+Phone|411528571
+Email|aryan.gupta1@outlook.com
+AccountNo|87454494
+Balance|100
+
+20/9/2021|Deposit|100|100
+
+20/9/2021|Deposit|20|120
+
+20/9/2021|Withdraw|20|100

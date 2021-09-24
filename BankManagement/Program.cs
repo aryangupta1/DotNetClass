@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net;
@@ -36,8 +37,18 @@ namespace BankManagement
             Console.SetCursorPosition(LoginCursorY, loginCursorX);
             username = Console.ReadLine();
             Console.SetCursorPosition(passwordCursorY, passwordCursorX);
-            password = Console.ReadLine();
-            
+            //Mask password with ***
+            ConsoleKeyInfo keyInput;
+            do
+            {
+                keyInput = Console.ReadKey(true);
+                if (keyInput.Key != ConsoleKey.Enter)
+                {
+                    password += keyInput.KeyChar.ToString();
+                    Console.Write("*");
+                }
+            }
+            while (keyInput.Key != ConsoleKey.Enter);
             //Check username and password
             var loginFile = File.ReadAllText("login.txt");
             string[] loginDetails = loginFile.Split('|');
@@ -113,6 +124,9 @@ namespace BankManagement
                     break;
                 case 5:
                     email.AccountStatement();
+                    break;
+                case 6:
+                    account.Delete();
                     break;
                 case 7:
                     LogIn login = new LogIn();
@@ -235,13 +249,7 @@ namespace BankManagement
                 Console.WriteLine("                  |");
                 Console.WriteLine("\t\t===================================");
                 string[] accountInformation = File.ReadAllLines($"{accountNumber}.txt");
-                for (int i = 0; i< accountInformation.Length; i++)
-                {
-                    //Get rid of delimiter and replace with :
-                    accountInformation[i] = accountInformation[i].Replace("|", ":");
-                    Console.WriteLine($"\t\t  {accountInformation[i]}");
-
-                }
+                DisplayAccountInformation(accountInformation, false);
                 Console.WriteLine("\t\t===================================");
             }
             //If account doesn't exist, search again with message account not found
@@ -267,6 +275,36 @@ namespace BankManagement
                 MainMenu menu = new MainMenu();
                 menu.UserInterface();
             }
+        }
+        public void DisplayAccountInformation(string[] accountInformation, bool lastFiveTransactions)
+        {
+            //Check if this is being used in display account statement method
+            if (lastFiveTransactions)
+            {
+                //Display 0-6 general account details. E.g. Name, email etc
+                for (int x = 0; x < 7; x++)
+                {
+                    //Get rid of delimiter and replace with :
+                    accountInformation[x] = accountInformation[x].Replace("|", ":");
+                    Console.WriteLine($"\t\t  {accountInformation[x]}");
+                }
+                //Length - 5 is the last 5 transactions, anything in between will not be counted as they are old transactions
+                for (int x = accountInformation.Length - 5; x < accountInformation.Length; x++)
+                {
+                    accountInformation[x] = accountInformation[x].Replace("|", ":");
+                    Console.WriteLine($"\t\t  {accountInformation[x]}");
+                }
+            }
+            else //Used in search account and delete methods
+            {
+                //Loop through each field in account information file
+                for (int i = 0; i < accountInformation.Length; i++)
+                {
+                    accountInformation[i] = accountInformation[i].Replace("|", ":");
+                    Console.WriteLine($"\t\t  {accountInformation[i]}");
+                }
+            }
+
         }
         public void Deposit()
         {
@@ -300,11 +338,19 @@ namespace BankManagement
                 int balance = int.Parse(Console.ReadLine());
                 int amount = balance; //Save for deposit amount
                 //Add balance to existing balance and write to file
-                string accountInformation = File.ReadAllText($"{fileName}.txt");
                 var currentBalance = Helpers.GetSpecificLine($"{fileName}.txt", 7).Replace("Balance|", "");
                 balance = int.Parse(currentBalance) + balance;
-                accountInformation = accountInformation.Replace(currentBalance, $"{balance}");
-                File.WriteAllText($"{fileName}.txt", accountInformation);
+                string[] accountInformationArray = File.ReadAllLines($"{accountNumber}.txt");
+                //Replace old balance with new balance after deposit
+                for (int i = 0; i < accountInformationArray.Length; i++)
+                {
+                    if (accountInformationArray[i].Contains("Balance|"))
+                    {
+                        accountInformationArray[i] = "Balance| " + balance;
+                    }
+                }
+                //accountInformation = accountInformation.Insert(Helpers.GetSpecificLine($"{fileName}.txt", 7).in, accountInformationArray[6]);
+                File.WriteAllLines($"{fileName}.txt", accountInformationArray); 
                 Console.Write("\t\t| Deposit Successful!");
                 Console.WriteLine("             |");
                 Console.WriteLine("\t\t===================================");
@@ -361,11 +407,18 @@ namespace BankManagement
                 int balance = int.Parse(Console.ReadLine());
                 int amount = balance; //Save this value as withdrawal amount
                 //Subtract balance from existing balance and write to file
-                string accountInformation = File.ReadAllText($"{fileName}.txt");
                 var currentBalance = Helpers.GetSpecificLine($"{fileName}.txt", 7).Replace("Balance|", "");
                 balance = int.Parse(currentBalance) - balance;
-                accountInformation = accountInformation.Replace(currentBalance, $"{balance}");
-                File.WriteAllText($"{fileName}.txt", accountInformation);
+                string[] accountInformationArray = File.ReadAllLines($"{accountNumber}.txt");
+                //Replace old balance with new balance after withdrawal
+                for (int i = 0; i < accountInformationArray.Length; i++)
+                {
+                    if (accountInformationArray[i].Contains("Balance|"))
+                    {
+                        accountInformationArray[i] = "Balance| " + balance;
+                    }
+                }
+                File.WriteAllLines($"{fileName}.txt", accountInformationArray);
                 Console.Write("\t\t| Deposit Successful!");
                 Console.WriteLine("             |");
                 Console.WriteLine("\t\t===================================");
@@ -389,8 +442,66 @@ namespace BankManagement
                     menu.UserInterface();
                 }
             }
-            
-
+        }
+        public void Delete()
+        {
+            Account account = new Account();
+            MainMenu menu = new MainMenu();
+            //Clear screen
+            Console.Clear();
+            //Render withdraw UI
+            Console.WriteLine("\t\t===================================");
+            Console.WriteLine("\t\t|     Delete an account           |");
+            Console.WriteLine("\t\t===================================");
+            Console.Write("\t\t|    Enter the details");
+            Console.WriteLine("            |");
+            Console.Write("\t\t| Account Number: ");
+            int cursorX = Console.CursorTop;
+            int cursorY = Console.CursorLeft;
+            Console.WriteLine("\t\t  |");
+            Console.SetCursorPosition(cursorY, cursorX);
+            //Find account
+            int accountNumber = Int32.Parse(Console.ReadLine());
+            string fileName = accountNumber.ToString();
+            //Check if file exists, if not ask to check again
+            if (File.Exists($"{fileName}.txt"))
+            {
+                //Display account details, ask to delete, then delete or reset screen
+                string[] accountInformation = File.ReadAllLines($"{accountNumber}.txt");
+                DisplayAccountInformation(accountInformation, false);
+                Console.WriteLine("\t\t===================================");
+                Console.Write("\t\t|Delete account (y/n)?:");
+                int xCursor = Console.CursorTop;
+                int yCursor = Console.CursorLeft;
+                Console.WriteLine("\t\t  |");
+                Console.SetCursorPosition(yCursor, xCursor);
+                char yesOrNo = Console.ReadKey().KeyChar;
+                //Delete account and return to main menu, or just return to main menu
+                switch (yesOrNo)
+                {
+                    case 'y':
+                        File.Delete($"{fileName}.txt");
+                        menu.UserInterface();
+                        break;
+                    case 'n':
+                        menu.UserInterface();
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                //If account not found search again
+                if (CheckAccount(true).Equals(true))
+                {
+                    Delete();
+                }
+                else
+                {
+                    menu.UserInterface();
+                }
+            }
         }
         public void WriteTransaction(string fileName, string transactionType, int transactionAmount, int totalBalance)
         {
@@ -398,7 +509,7 @@ namespace BankManagement
             string today = date.ToString("dd/M/yyyy", CultureInfo.InvariantCulture);
             using(StreamWriter sw = File.AppendText($"{fileName}.txt"))
             {
-                sw.WriteLine(Environment.NewLine + $"{today}|" + $"{transactionType}|{transactionAmount}" + $"|{totalBalance}");
+                sw.WriteLine($"{today}|" + $"{transactionType}|{transactionAmount}" + $"|{totalBalance}");
                 sw.Close();
             }
         }
@@ -457,11 +568,12 @@ namespace BankManagement
         public void AccountStatement()
         {
             Account account = new Account();
+            MainMenu mainMenu = new MainMenu();
             //Clear screen
             Console.Clear();
-            //Render AC Statement UI
+            //Render withdraw UI
             Console.WriteLine("\t\t===================================");
-            Console.WriteLine("\t\t|     Statement                   |");
+            Console.WriteLine("\t\t|     Account Statement           |");
             Console.WriteLine("\t\t===================================");
             Console.Write("\t\t|    Enter the details");
             Console.WriteLine("            |");
@@ -473,9 +585,12 @@ namespace BankManagement
             //Find account
             int accountNumber = Int32.Parse(Console.ReadLine());
             string fileName = accountNumber.ToString();
+            string[] accountInformation = File.ReadAllLines($"{fileName}.txt");
             if (File.Exists($"{fileName}.txt"))
             {
-
+                Console.WriteLine("\t\t|    Current Statement            |");
+                account.DisplayAccountInformation(accountInformation, true);
+                Console.WriteLine("\t\t===================================");
             }
             //If account not found search again
             else
@@ -490,6 +605,57 @@ namespace BankManagement
                     menu.UserInterface();
                 }
             }
+            //Ask to send statement
+            Console.Write("\t\t|Email statement (y/n)?:");
+            int xCursor = Console.CursorTop;
+            int yCursor = Console.CursorLeft;
+            Console.WriteLine("\t  |");
+            Console.SetCursorPosition(yCursor, xCursor);
+            char yesOrNo = Console.ReadKey().KeyChar;
+            //Proceed to send account statement and return to main menu, or just return to main menu
+            switch (yesOrNo)
+            {
+                case 'y':
+                    break;
+                case 'n':
+                    mainMenu.UserInterface();
+                    break;
+                default:
+                    break;
+            }
+            //Create new list with user information and last 5 transactions to write to a new file, that will be emailed to user
+            List<string> accountStatement = new List<string>();
+            //0->6 is general account details
+            for (int i = 0; i<7; i++)
+            {
+                accountStatement.Add(accountInformation[i]);
+            }
+            //Add 5 most recent transactions
+            for (int x = accountInformation.Length - 5; x < accountInformation.Length; x++)
+            {
+                accountStatement.Add(accountInformation[x]);
+            }
+            //Convert to array and write to file
+            String[] statement = accountStatement.ToArray();
+            using (FileStream fs = File.Create($"{accountNumber}Statement.txt"))
+            {
+                fs.Close();
+            }
+            File.WriteAllLines($"{accountNumber}Statement.txt", statement);
+            string file = File.ReadAllText($"{accountNumber}Statement.txt");
+            var client = smtpClient();
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress("aryantesting2001@gmail.com"),
+                Subject = "Your account statement",
+                Body = file, 
+            };
+            //Get account email
+            string email = Helpers.GetSpecificLine($"{fileName}.txt", 5).Replace("Email|", "");
+            mailMessage.To.Add(email);
+            client.Send(mailMessage);
+            Console.ReadKey();
+            mainMenu.UserInterface();
         }
     }
     class Program
