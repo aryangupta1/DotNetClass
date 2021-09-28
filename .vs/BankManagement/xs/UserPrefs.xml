@@ -3,6 +3,17 @@
     <Files>
       <File FileName="BankManagement/Program.cs" Line="151" Column="35" />
     </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="BankManagement" expanded="True">
+            <Node name="BankManagement" expanded="True">
+              <Node name="Program.cs" selected="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
   <MonoDevelop.Ide.ItemProperties.BankManagement PreferredExecutionTarget="MonoDevelop.Default" />

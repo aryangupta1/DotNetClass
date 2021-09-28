@@ -1,7 +1,0 @@
-First Name|Aryan
-Last Name |Gupt
-Address|aryan
-Phone|315
-Email|aryan.gupta1@outlook.com
-AccountNo|44995940
-Balance|0

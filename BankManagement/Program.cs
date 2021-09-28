@@ -457,8 +457,8 @@ namespace BankManagement
                     }
                 }
                 File.WriteAllLines($"{fileName}.txt", accountInformationArray);
-                Console.Write("\t\t| Deposit Successful!");
-                Console.WriteLine("             |");
+                Console.Write("\t\t| Withdrawal Successful!");
+                Console.WriteLine("          |");
                 Console.WriteLine("\t\t===================================");
                 Console.ReadKey();
                 //Add to transaction history on file
