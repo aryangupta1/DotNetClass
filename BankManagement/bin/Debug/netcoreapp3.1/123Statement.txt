@@ -4,9 +4,9 @@ Address:336/17 Howard Avenue
 Phone:411528571
 Email:aryan.gupta1@outlook.com
 AccountNo:26865386
-Balance: 9410
-20/9/2021:Withdraw:900:9150
+Balance: 410
 20/9/2021:Deposit:100:9250
 20/9/2021:Deposit:30:9280
 20/9/2021:Deposit:30:9310
 20/9/2021:Deposit:100:9410
+26/9/2021:Withdraw:9000:410

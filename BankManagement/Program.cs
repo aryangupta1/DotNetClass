@@ -64,6 +64,8 @@ namespace BankManagement
             }
             else
             {
+                //Reset password, otherwise it will keep incrementing. E.g. passwordpasswordpassword
+                password = "";
                 Console.SetCursorPosition(errorCursorY, errorCursorX);
                 Console.WriteLine("Invalid Credentials \t\t| ");
                 Console.ReadKey();
@@ -81,7 +83,7 @@ namespace BankManagement
             //Render Main menu UI
             Console.WriteLine("\t\t ================================");
             Console.WriteLine("\t\t|     Welcome to My Bank        |");
-            Console.WriteLine("\t\t ================================");
+            Console.WriteLine("\t\t ===============================");
             Console.WriteLine("\t\t| \t\t\t        |");
             Console.Write("\t\t| 1. Create a new account");
             Console.WriteLine("       |");
@@ -103,38 +105,51 @@ namespace BankManagement
             int cursorY = Console.CursorLeft;
             Console.WriteLine("      |");
             Console.SetCursorPosition(cursorY, cursorX);
-            int userChoice = short.Parse(Console.ReadLine());
-            Console.WriteLine(userChoice);
-            //Navigation based on users choice
-            Account account = new Account();
-            Email email = new Email();
-            switch (userChoice)
+            try
             {
-                case 1:
-                    account.Create();
-                    break;
-                case 2:
-                    account.Search();
-                    break;
-                case 3:
-                    account.Deposit();
-                    break;
-                case 4:
-                    account.Withdraw();
-                    break;
-                case 5:
-                    email.AccountStatement();
-                    break;
-                case 6:
-                    account.Delete();
-                    break;
-                case 7:
-                    LogIn login = new LogIn();
-                    login.UserInterface();
-                    break;
-                default:
-                    UserInterface();
-                    break;
+                int userChoice = short.Parse(Console.ReadLine());
+                Console.WriteLine("\t\t ===============================");
+                //Navigation based on users choice
+                Account account = new Account();
+                Email email = new Email();
+                switch (userChoice)
+                {
+                    case 1:
+                        account.Create();
+                        break;
+                    case 2:
+                        account.Search();
+                        break;
+                    case 3:
+                        account.Deposit();
+                        break;
+                    case 4:
+                        account.Withdraw();
+                        break;
+                    case 5:
+                        email.AccountStatement();
+                        break;
+                    case 6:
+                        account.Delete();
+                        break;
+                    case 7:
+                        LogIn login = new LogIn();
+                        login.UserInterface();
+                        break;
+                    //All other numbers
+                    default:
+                        Console.Write("\t\t Incorrect input, try again.");
+                        Console.ReadKey();
+                        UserInterface();
+                        break;
+                }
+            }
+            //If non-numbers are entered
+            catch
+            {
+                Console.Write("\t\t Incorrect input, try again.");
+                Console.ReadKey();
+                UserInterface();
             }
         }
     }
@@ -153,7 +168,16 @@ namespace BankManagement
             string[] userAccountFields = new string[5] {"First Name: ", "Last Name: ", "Address: ", "Phone: ", "Email: "};
             UserAccount newUser = new UserAccount();
             //Call function to display creation form
-            EnterAccountInformation(userAccountFields, newUser);
+            try
+            {
+                EnterAccountInformation(userAccountFields, newUser);
+            }
+            catch
+            {
+                Console.Write("\t\t|Incorrect details, try again");
+                Console.ReadKey();
+                Create();
+            }
             //Check account fields, if anything is incorrect call function again so the user can re-enter
             Console.WriteLine("\t\t====================================");
             Console.Write("\t\t|Are the details correct (y/n)?:");
@@ -219,6 +243,12 @@ namespace BankManagement
                         break;
                     case "Email: ":
                         newUser.Email = Console.ReadLine();
+                        if (!newUser.Email.Contains("@"))
+                        {
+                            Console.Write("\t\t|Incorrect details, try again");
+                            Console.ReadKey();
+                            Create();
+                        }
                         break;
                     default:
                         break;
@@ -409,6 +439,14 @@ namespace BankManagement
                 //Subtract balance from existing balance and write to file
                 var currentBalance = Helpers.GetSpecificLine($"{fileName}.txt", 7).Replace("Balance|", "");
                 balance = int.Parse(currentBalance) - balance;
+                //Check if balance is > 0
+                if (balance < 0)
+                {
+                    Console.Write("\t\t| Insufficient Balance, try again.");
+                    Console.WriteLine("|");
+                    Console.ReadKey();
+                    Withdraw();
+                }
                 string[] accountInformationArray = File.ReadAllLines($"{accountNumber}.txt");
                 //Replace old balance with new balance after withdrawal
                 for (int i = 0; i < accountInformationArray.Length; i++)
